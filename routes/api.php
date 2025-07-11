@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\SeasonController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\AutoPlayController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +61,21 @@ Route::prefix('games')->group(function () {
 });
 
 // Health check route
+// Auto-play and Enhanced Simulation
+Route::prefix('autoplay')->group(function () {
+    Route::get('/options', [AutoPlayController::class, 'getOptions']);
+    Route::post('/seasons/{season}/start', [AutoPlayController::class, 'start']);
+    Route::post('/seasons/{season}/continue', [AutoPlayController::class, 'continue']);
+    Route::post('/seasons/{season}/stop', [AutoPlayController::class, 'stop']);
+});
+
+Route::prefix('advanced')->group(function () {
+    Route::get('/seasons/{season}/predictions', [AutoPlayController::class, 'getAdvancedPredictions']);
+    Route::post('/seasons/{season}/simulate', [AutoPlayController::class, 'simulateEnhanced']);
+    Route::get('/seasons/{season}/weeks/{week}/analytics', [AutoPlayController::class, 'getWeekAnalytics']);
+});
+
+// Health check
 Route::get('/health', function () {
     return response()->json([
         'success' => true,

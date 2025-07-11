@@ -37,6 +37,7 @@
             :loading="loading.simulation"
             @simulate-week="simulateWeek"
             @simulate-season="simulateSeason"
+            @auto-play="startAutoPlay"
             @previous-week="changeWeek($event)"
             @next-week="changeWeek($event)"
           ></season-controls>
@@ -190,17 +191,21 @@ export default {
     async simulateWeek(week) {
       this.loading.simulation = true;
       try {
-        const response = await fetch(`/api/seasons/1/games/week/${week}/simulate`, {
+        const response = await fetch(`/api/advanced/seasons/1/simulate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-          }
+          },
+          body: JSON.stringify({
+            week: week,
+            mode: 'realistic' // Enhanced simulation with form and momentum
+          })
         });
         const data = await response.json();
         
         if (data.success) {
-          this.showNotification(`Week ${week} simulated successfully!`, 'success');
+          this.showNotification(`Week ${week} enhanced simulation complete! (${data.data.games_simulated} games)`, 'success');
           await Promise.all([
             this.loadLeagueTable(),
             this.loadWeekMatches(week)
@@ -300,16 +305,49 @@ export default {
     async generatePredictions() {
       this.loading.predictions = true;
       try {
-        const response = await fetch('/api/seasons/1/predictions');
+        const response = await fetch('/api/advanced/seasons/1/predictions');
         const data = await response.json();
         if (data.success) {
-          this.predictions = data.data.predictions;
-          this.showNotification('Predictions generated successfully!', 'success');
+          // Use consensus predictions (combines all 5 algorithms)
+          this.predictions = data.data.predictions.consensus;
+          this.showNotification('Advanced AI predictions generated! (5 algorithms combined)', 'success');
         }
       } catch (error) {
         this.showNotification('Failed to generate predictions', 'error');
       } finally {
         this.loading.predictions = false;
+      }
+    },
+
+    async startAutoPlay() {
+      this.loading.simulation = true;
+      try {
+        const response = await fetch('/api/autoplay/seasons/1/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            speed: 'normal',
+            mode: 'realistic'
+          })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showNotification(`🤖 Auto-play started! Simulated ${data.data.games_simulated} games with analytics`, 'success');
+          await Promise.all([
+            this.loadLeagueTable(),
+            this.loadWeekMatches(this.currentWeek)
+          ]);
+        } else {
+          this.showNotification(data.message, 'error');
+        }
+      } catch (error) {
+        this.showNotification('Failed to start auto-play', 'error');
+      } finally {
+        this.loading.simulation = false;
       }
     },
 
