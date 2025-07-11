@@ -1,1 +1,69 @@
- 
+services:
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: football-league-sim
+    container_name: football-league-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - football-league
+
+  # Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: football-league-webserver
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - football-league
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: football-league-db
+    restart: unless-stopped
+    ports:
+      - "33060:3306"
+    environment:
+      MYSQL_DATABASE: football_league
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: password
+      MYSQL_USER: laravel
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - football-league
+
+  # Node.js for Vue.js development
+  node:
+    image: node:18-alpine
+    container_name: football-league-node
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    networks:
+      - football-league
+
+# Docker Networks
+networks:
+  football-league:
+    driver: bridge
+
+# Volumes
+volumes:
+  dbdata:
+    driver: local 
