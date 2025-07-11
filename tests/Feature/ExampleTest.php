@@ -1,19 +1,16 @@
 <?php
 
-namespace Tests\Feature;
+// Test that the application returns a successful response
+test('the application returns a successful response', function () {
+    $response = $this->get('/');
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+    $response->assertStatus(200);
+});
 
-class ExampleTest extends TestCase
-{
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-}
+// Test Vue.js application route
+test('vue application route works', function () {
+    $response = $this->get('/app');
+    
+    $response->assertStatus(200);
+    $response->assertSee('Football League Simulation');
+});
