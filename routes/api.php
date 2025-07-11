@@ -39,6 +39,7 @@ Route::prefix('seasons')->group(function () {
     Route::get('/current', [SeasonController::class, 'current']);
     Route::get('/{season}', [SeasonController::class, 'show']);
     Route::put('/{season}/start', [SeasonController::class, 'start']);
+    Route::put('/{season}/reset', [SeasonController::class, 'reset']);
     Route::get('/{season}/table', [SeasonController::class, 'table']);
     Route::get('/{season}/stats', [SeasonController::class, 'stats']);
     Route::get('/{season}/results', [SeasonController::class, 'results']);

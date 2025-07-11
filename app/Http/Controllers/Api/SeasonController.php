@@ -176,6 +176,32 @@ class SeasonController extends Controller
     }
 
     /**
+     * Reset a season to initial state.
+     */
+    public function reset(Season $season): JsonResponse
+    {
+        try {
+            $resetSeason = $this->leagueService->resetSeason($season);
+            $stats = $this->leagueService->getSeasonStats($resetSeason);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'season' => $resetSeason,
+                    'statistics' => $stats,
+                    'message' => 'Season reset to initial state'
+                ],
+                'message' => 'Season reset successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reset season: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get league table for a season.
      */
     public function table(Season $season): JsonResponse

@@ -228,6 +228,30 @@ class LeagueService
     }
 
     /**
+     * Reset a season to its initial state (all games scheduled, no results)
+     * 
+     * @param Season $season
+     * @return Season
+     */
+    public function resetSeason(Season $season): Season
+    {
+        // Reset all games in the season
+        $season->games()->update([
+            'home_goals' => null,
+            'away_goals' => null,
+            'status' => 'scheduled',
+            'played_at' => null,
+        ]);
+
+        // Reset season status
+        $season->update([
+            'status' => 'active',
+        ]);
+
+        return $season->fresh();
+    }
+
+    /**
      * Get season statistics and progress
      * 
      * @param Season $season

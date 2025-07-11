@@ -38,6 +38,7 @@
             @simulate-week="simulateWeek"
             @simulate-season="simulateSeason"
             @auto-play="startAutoPlay"
+            @reset-season="resetSeason"
             @previous-week="changeWeek($event)"
             @next-week="changeWeek($event)"
           ></season-controls>
@@ -346,6 +347,36 @@ export default {
         }
       } catch (error) {
         this.showNotification('Failed to start auto-play', 'error');
+      } finally {
+        this.loading.simulation = false;
+      }
+    },
+
+    async resetSeason() {
+      this.loading.simulation = true;
+      try {
+        const response = await fetch('/api/seasons/1/reset', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showNotification('🔄 Season reset successfully! All matches are now scheduled.', 'success');
+          this.currentWeek = 1; // Reset to week 1
+          this.predictions = []; // Clear predictions
+          await Promise.all([
+            this.loadLeagueTable(),
+            this.loadWeekMatches(1)
+          ]);
+        } else {
+          this.showNotification(data.message, 'error');
+        }
+      } catch (error) {
+        this.showNotification('Failed to reset season', 'error');
       } finally {
         this.loading.simulation = false;
       }

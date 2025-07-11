@@ -278,6 +278,58 @@ test('can reset game', function () {
     expect($resetGame->played_at)->toBeNull();
 });
 
+test('can reset season to initial state', function () {
+    $service = new LeagueService();
+
+    $homeTeam = Team::create(['name' => 'Home Team', 'city' => 'Home City', 'strength' => 80]);
+    $awayTeam = Team::create(['name' => 'Away Team', 'city' => 'Away City', 'strength' => 70]);
+    
+    $season = Season::create([
+        'name' => 'Test Season',
+        'start_date' => now(),
+        'status' => 'completed',
+        'is_current' => true,
+    ]);
+
+    // Create completed games
+    $game1 = Game::create([
+        'season_id' => $season->id,
+        'home_team_id' => $homeTeam->id,
+        'away_team_id' => $awayTeam->id,
+        'week' => 1,
+        'status' => 'completed',
+        'home_goals' => 2,
+        'away_goals' => 1,
+        'played_at' => now(),
+    ]);
+
+    $game2 = Game::create([
+        'season_id' => $season->id,
+        'home_team_id' => $awayTeam->id,
+        'away_team_id' => $homeTeam->id,
+        'week' => 2,
+        'status' => 'completed',
+        'home_goals' => 0,
+        'away_goals' => 3,
+        'played_at' => now(),
+    ]);
+
+    // Reset the season
+    $resetSeason = $service->resetSeason($season);
+
+    // Check that season is reset
+    expect($resetSeason->status)->toBe('active');
+    
+    // Check that all games are reset
+    $allGames = $season->games()->get();
+    foreach ($allGames as $game) {
+        expect($game->status)->toBe('scheduled');
+        expect($game->home_goals)->toBeNull();
+        expect($game->away_goals)->toBeNull();
+        expect($game->played_at)->toBeNull();
+    }
+});
+
 test('can get season statistics', function () {
     $service = new LeagueService();
 
