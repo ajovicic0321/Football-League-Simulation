@@ -225,10 +225,9 @@ class AutoPlayController extends Controller
                 ->where('week', $week)
                 ->where('status', 'completed')
                 ->with(['homeTeam', 'awayTeam'])
-                ->get()
-                ->toArray();
+                ->get();
 
-            if (empty($games)) {
+            if ($games->isEmpty()) {
                 return response()->json([
                     'success' => false,
                     'message' => "No completed games found for week {$week}"
@@ -242,7 +241,7 @@ class AutoPlayController extends Controller
                 'data' => [
                     'week' => $week,
                     'analytics' => $analytics,
-                    'games' => $games
+                    'games' => $games->toArray()
                 ],
                 'message' => "Analytics for week {$week} retrieved"
             ]);

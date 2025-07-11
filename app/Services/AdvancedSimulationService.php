@@ -81,7 +81,13 @@ class AdvancedSimulationService
         ->get();
 
         if ($recentGames->isEmpty()) {
-            return ['score' => 0, 'trend' => 'neutral', 'confidence' => 0.5];
+            return [
+                'score' => 0, 
+                'trend' => 'neutral', 
+                'goals_for_avg' => 1.0,
+                'goals_against_avg' => 1.0,
+                'confidence' => 0.5
+            ];
         }
 
         $formPoints = 0;
@@ -470,7 +476,7 @@ class AdvancedSimulationService
             $statPos = $this->findTeamPosition($statPrediction, $teamId);
             
             // Weighted average (can adjust weights)
-            $consensusPosition = round(($strengthPos * 0.4 + $formPos * 0.35 + $statPos * 0.25));
+            $consensusPosition = (int) round(($strengthPos * 0.4 + $formPos * 0.35 + $statPos * 0.25));
             
             $consensus[] = [
                 'team' => $team,
@@ -505,7 +511,7 @@ class AdvancedSimulationService
         return $season->games()->max('week') ?? 12;
     }
 
-    private function getSeasonStatus(Season $season): array
+    public function getSeasonStatus(Season $season): array
     {
         $totalGames = $season->games()->count();
         $completedGames = $season->games()->where('status', 'completed')->count();
@@ -518,7 +524,7 @@ class AdvancedSimulationService
         ];
     }
 
-    private function generateWeekAnalytics(Season $season, int $week, array $results): array
+    public function generateWeekAnalytics(Season $season, int $week, $results): array
     {
         $totalGoals = 0;
         $upsets = 0; // Lower strength team winning
@@ -544,9 +550,10 @@ class AdvancedSimulationService
         ];
     }
 
-    private function calculateEntertainmentScore(array $games): float
+    private function calculateEntertainmentScore($games): float
     {
-        if (empty($games)) return 0;
+        $gameCount = is_countable($games) ? count($games) : 0;
+        if ($gameCount === 0) return 0;
         
         $score = 0;
         foreach ($games as $game) {
@@ -557,7 +564,7 @@ class AdvancedSimulationService
             $score += $totalGoals * 0.3 + (5 - min($goalDiff, 4)) * 0.2;
         }
         
-        return min(10, $score / count($games));
+        return min(10, $score / $gameCount);
     }
 
     private function getCurrentTeamStats(Season $season, Team $team): array
