@@ -4,6 +4,12 @@ A comprehensive football league simulation system featuring 4 Premier League tea
 
 ![Football League Simulation](https://img.shields.io/badge/PHP-8.2-blue) ![Laravel](https://img.shields.io/badge/Laravel-10-red) ![Vue.js](https://img.shields.io/badge/Vue.js-2.7-green) ![Docker](https://img.shields.io/badge/Docker-Ready-blue) ![Tests](https://img.shields.io/badge/Tests-100%25%20Passing-brightgreen)
 
+## 📸 Application Screenshot
+
+![Insider Champions League Screenshot](docs/images/Football%20League%20Simulation.jpg)
+
+*Beautiful, responsive interface showing the league table, season controls, AI predictions, and match fixtures*
+
 ## 📋 Project Overview
 
 This project simulates a complete football league with 4 teams competing in a double round-robin tournament. The system provides:
